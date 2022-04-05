@@ -30,6 +30,8 @@ data Hosts = Hosts
 
 --------------------------------------------------------------------------------
 
+-- Try it online at:https://dreampuf.github.io/GraphvizOnline/
+
 main :: IO ()
 main = do
         (filePath:_) <- getArgs
