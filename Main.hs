@@ -80,7 +80,7 @@ fromIni' ((IniGroup sectionName hosts):xss) (Inventory sMap hMap) =
                                 sectionName
                                 (
                                           Set.fromList $ map
-                                                (head. inventoriesIniMachines)
+                                                (head. iniMachines)
                                                 hosts
                                         , Map.empty
                                 )
@@ -89,7 +89,7 @@ fromIni' ((IniGroup sectionName hosts):xss) (Inventory sMap hMap) =
                         (fromIni''
                                 sectionName
                                 (map
-                                        (head . inventoriesIniMachines)
+                                        (head . iniMachines)
                                         hosts
                                 )
                                 hMap
@@ -129,7 +129,7 @@ data IniGroup = IniGroup Text.Text [IniMachines]
 -- | The components of every machine/variables.
 data IniMachines = IniMachines
         {
-                inventoriesIniMachines :: [Text.Text]
+                iniMachines :: [Text.Text]
         } deriving Show
 
 --------------------------------------------------------------------------------
