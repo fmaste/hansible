@@ -140,11 +140,11 @@ parseGroup = do
         name <- AT.takeWhile (/= ']')
         _ <- AT.char ']'
         parserWhiteSpace
-        content <- parseSectionContent []
+        content <- parseGroupContent []
         return $ InventoriesIniSection name content
 
-parseSectionContent :: [Text.Text] -> AT.Parser [Text.Text]
-parseSectionContent xss = do
+parseGroupContent :: [Text.Text] -> AT.Parser [Text.Text]
+parseGroupContent xss = do
         peek <- AT.peekChar
         case peek of
                 Nothing -> return xss
@@ -153,7 +153,7 @@ parseSectionContent xss = do
                         else do
                                 content <- AT.takeTill isSpace
                                 parserWhiteSpace
-                                parseSectionContent (content:xss)
+                                parseGroupContent (content:xss)
 
 parserWhiteSpace :: AT.Parser ()
 parserWhiteSpace = do
