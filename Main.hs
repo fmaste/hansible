@@ -210,7 +210,9 @@ parseMachines xss = do
                                 parserTrim
                                 parseMachines (xss ++ [machineName])
 
-{-- TODO: How INI variables are parsed:
+{-- TODO: Add a fix to parse variable values with escape characters!
+
+How INI variables are parsed:
 https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#inventory-aliases
 
 When declared inline with the host, INI values are interpreted as Python literal
