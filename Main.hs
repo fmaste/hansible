@@ -118,7 +118,7 @@ fromIni'' sectionName (hostName:hosts) hMap = fromIni'' sectionName hosts
 data Ini = Ini [IniGroup]
         deriving Show
 
--- | The components of every group.
+-- | The name and components of every group.
 -- Groups of groups are parsed as one group here ("[southeast:children]"):
 -- https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#inheriting-variable-values-group-variables-for-groups-of-groups
 -- Section level variables are parsed as machine names:
@@ -126,7 +126,7 @@ data Ini = Ini [IniGroup]
 data IniGroup = IniGroup Text.Text [IniMachines]
         deriving Show
 
--- | The components of every machine/variables.
+-- | The components of every machine/variables line.
 data IniMachines = IniMachines
         {
                 iniMachines :: [Text.Text]
