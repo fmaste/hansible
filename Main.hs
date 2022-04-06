@@ -123,8 +123,11 @@ data Ini = Ini [IniGroup]
 -- https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#inheriting-variable-values-group-variables-for-groups-of-groups
 -- Section level variables are parsed as machine names:
 -- https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#assigning-a-variable-to-many-machines-group-variables
-data IniGroup = IniGroup Text.Text [IniMachines]
-        deriving Show
+data IniGroup = IniGroup
+        {
+                  iniGroupName :: Text.Text
+                , initGroupMachines :: [IniMachines]
+        } deriving Show
 
 -- | The components of every machine/variables line.
 data IniMachines = IniMachines
