@@ -127,7 +127,7 @@ parserInventoriesIni = do
 parserInventoriesIni' :: [InventoriesIniGroup]
                       -> AT.Parser [InventoriesIniGroup]
 parserInventoriesIni' xss = do
-        parserWhiteSpace
+        parserTrim
         peek <- AT.peekChar
         case peek of
                 Nothing -> return xss
@@ -141,7 +141,7 @@ parseGroup = do
         _ <- AT.char '['
         name <- AT.takeWhile (/= ']')
         _ <- AT.char ']'
-        parserWhiteSpace
+        parserTrim
         content <- parseGroupContent []
         return $ InventoriesIniGroup name content
 
@@ -155,12 +155,12 @@ parseGroupContent xss = do
                         then return xss
                         else do
                                 content <- AT.takeTill isSpace
-                                parserWhiteSpace
+                                parserTrim
                                 parseGroupContent (content:xss)
 
 -- Trim whitespace and comments.
-parserWhiteSpace :: AT.Parser ()
-parserWhiteSpace = do
+parserTrim :: AT.Parser ()
+parserTrim = do
         AT.skipSpace
         maybeChar <- AT.peekChar
         case maybeChar of
@@ -168,6 +168,6 @@ parserWhiteSpace = do
                 (Just char) -> if char == ';' || char == '#'
                         then do
                                 AT.skipWhile (/= '\n')
-                                parserWhiteSpace
+                                parserTrim
                         else
                                 return ()
