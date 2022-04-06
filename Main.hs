@@ -108,7 +108,7 @@ data InventoriesIni = InventoriesIni [InventoriesIniGroup]
         deriving Show
 
 -- | The components of every section.
--- Groups of groups are parsed as one group here:
+-- Groups of groups are parsed as one group here ("[southeast:children]"):
 -- https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#inheriting-variable-values-group-variables-for-groups-of-groups
 -- Section level variables are parsed as machine names:
 -- https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#assigning-a-variable-to-many-machines-group-variables
@@ -117,12 +117,13 @@ data InventoriesIniGroup = InventoriesIniGroup Text.Text [Text.Text]
 
 --------------------------------------------------------------------------------
 
-
+-- INI parser starting point.
 parserInventoriesIni :: AT.Parser InventoriesIni
 parserInventoriesIni = do
         sections <- parserInventoriesIni' []
         return $ InventoriesIni sections
 
+-- Group parser loop.
 parserInventoriesIni' :: [InventoriesIniGroup]
                       -> AT.Parser [InventoriesIniGroup]
 parserInventoriesIni' xss = do
@@ -134,6 +135,7 @@ parserInventoriesIni' xss = do
                         group <- parseGroup
                         parserInventoriesIni' (group:xss)
 
+-- Parse a group.
 parseGroup :: AT.Parser InventoriesIniGroup
 parseGroup = do
         _ <- AT.char '['
@@ -143,6 +145,7 @@ parseGroup = do
         content <- parseGroupContent []
         return $ InventoriesIniGroup name content
 
+-- Parse group content.
 parseGroupContent :: [Text.Text] -> AT.Parser [Text.Text]
 parseGroupContent xss = do
         peek <- AT.peekChar
@@ -155,6 +158,7 @@ parseGroupContent xss = do
                                 parserWhiteSpace
                                 parseGroupContent (content:xss)
 
+-- Trim whitespace and comments.
 parserWhiteSpace :: AT.Parser ()
 parserWhiteSpace = do
         AT.skipSpace
