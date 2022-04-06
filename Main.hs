@@ -21,12 +21,14 @@ import qualified Data.Text.IO as TextIO
 
 --------------------------------------------------------------------------------
 
-data Hosts = Hosts
+data Inventory = Inventory
         -- Sections map.
-        (Map.Map Text.Text (Set.Set Text.Text))
+        (Map.Map Text.Text (Set.Set Text.Text, Variables))
         -- Hosts map.
-        (Map.Map Text.Text (Set.Set Text.Text))
+        (Map.Map Text.Text (Set.Set Text.Text, Variables))
         deriving Show
+
+type Variables = Map.Map Text.Text Text.Text
 
 --------------------------------------------------------------------------------
 
@@ -44,11 +46,11 @@ main = do
 
 --------------------------------------------------------------------------------
 
-toDot :: Hosts -> IO ()
-toDot (Hosts sMap hMap) = do
+toDot :: Inventory -> IO ()
+toDot (Inventory sMap hMap) = do
         forM_
                 (Map.toList sMap)
-                (\(sectionName,hSet) -> do
+                (\(sectionName,(hSet,_)) -> do
                         forM_
                                 (Set.toList hSet)
                                 (\hostName -> do
@@ -65,30 +67,35 @@ toDot (Hosts sMap hMap) = do
 
 --------------------------------------------------------------------------------
 
-fromIni :: InventoriesIni -> Hosts
-fromIni (InventoriesIni xss) = fromIni' xss (Hosts Map.empty Map.empty)
+fromIni :: InventoriesIni -> Inventory
+fromIni (InventoriesIni xss) = fromIni' xss (Inventory Map.empty Map.empty)
 
 
-fromIni' :: [InventoriesIniSection] -> Hosts -> Hosts
+fromIni' :: [InventoriesIniSection] -> Inventory -> Inventory
 fromIni' [] h = h
-fromIni' ((InventoriesIniSection sectionName hosts):xss) (Hosts sMap hMap) =
+fromIni' ((InventoriesIniSection sectionName hosts):xss) (Inventory sMap hMap) =
         fromIni'
                 xss
-                (Hosts
-                        (Map.insert sectionName (Set.fromList hosts) sMap)
+                (Inventory
+                        (Map.insert
+                                sectionName
+                                (Set.fromList hosts, Map.empty)
+                                sMap
+                        )
                         (fromIni'' sectionName hosts hMap)
                 )
 
 fromIni'' :: Text.Text
           -> [Text.Text]
-          -> (Map.Map Text.Text (Set.Set Text.Text))
-          -> (Map.Map Text.Text (Set.Set Text.Text))
+          -> (Map.Map Text.Text (Set.Set Text.Text, Variables))
+          -> (Map.Map Text.Text (Set.Set Text.Text, Variables))
 fromIni'' _ [] hMap = hMap
 fromIni'' sectionName (hostName:hosts) hMap = fromIni'' sectionName hosts
         (Map.alter
-                (\maybeSet -> case maybeSet of
-                        Nothing -> Just $ Set.singleton sectionName
-                        (Just sSet) -> Just $ Set.insert sectionName sSet
+                (\maybeValue -> case maybeValue of
+                        Nothing -> Just $ (Set.singleton sectionName, Map.empty)
+                        (Just (sSet, vars)) -> Just $
+                                (Set.insert sectionName sSet, vars)
                 )
                 hostName
                 hMap
