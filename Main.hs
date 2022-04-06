@@ -131,11 +131,11 @@ parserInventoriesIni' xss = do
         case peek of
                 Nothing -> return xss
                 (Just _) -> do
-                        section <- parseSection
+                        section <- parseGroup
                         parserInventoriesIni' (section:xss)
 
-parseSection :: AT.Parser InventoriesIniSection
-parseSection = do
+parseGroup :: AT.Parser InventoriesIniSection
+parseGroup = do
         _ <- AT.char '['
         name <- AT.takeWhile (/= ']')
         _ <- AT.char ']'
