@@ -107,7 +107,7 @@ fromIni'' sectionName (hostName:hosts) hMap = fromIni'' sectionName hosts
 data InventoriesIni = InventoriesIni [InventoriesIniGroup]
         deriving Show
 
--- | The components of every section.
+-- | The components of every group.
 -- Groups of groups are parsed as one group here ("[southeast:children]"):
 -- https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#inheriting-variable-values-group-variables-for-groups-of-groups
 -- Section level variables are parsed as machine names:
@@ -136,6 +136,8 @@ parserInventoriesIni' xss = do
                         parserInventoriesIni' (group:xss)
 
 -- Parse a group.
+-- The name of "[section_name:subsection_name]" or "[section_name:vars]" is
+-- parsed as one text.
 parseGroup :: AT.Parser InventoriesIniGroup
 parseGroup = do
         _ <- AT.char '['
