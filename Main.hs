@@ -51,6 +51,11 @@ toDot (Inventory sMap hMap) = do
         forM_
                 (Map.toList sMap)
                 (\(sectionName,(hSet,_)) -> do
+                        putStr "\""
+                        putStr (Text.unpack sectionName)
+                        putStr "\""
+                        putStr "[shape=box];"
+                        putStr "\n"
                         forM_
                                 (Set.toList hSet)
                                 (\hostName -> do
