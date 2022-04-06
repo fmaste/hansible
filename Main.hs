@@ -70,9 +70,9 @@ toDot (Inventory sMap hMap) = do
 fromIni :: Ini -> Inventory
 fromIni (Ini xss) = fromIni' xss (Inventory Map.empty Map.empty)
 
-fromIni' :: [InventoriesIniGroup] -> Inventory -> Inventory
+fromIni' :: [IniGroup] -> Inventory -> Inventory
 fromIni' [] h = h
-fromIni' ((InventoriesIniGroup sectionName hosts):xss) (Inventory sMap hMap) =
+fromIni' ((IniGroup sectionName hosts):xss) (Inventory sMap hMap) =
         fromIni'
                 xss
                 (Inventory
@@ -115,7 +115,7 @@ fromIni'' sectionName (hostName:hosts) hMap = fromIni'' sectionName hosts
 --------------------------------------------------------------------------------
 
 -- | The list of sections.
-data Ini = Ini [InventoriesIniGroup]
+data Ini = Ini [IniGroup]
         deriving Show
 
 -- | The components of every group.
@@ -123,7 +123,7 @@ data Ini = Ini [InventoriesIniGroup]
 -- https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#inheriting-variable-values-group-variables-for-groups-of-groups
 -- Section level variables are parsed as machine names:
 -- https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#assigning-a-variable-to-many-machines-group-variables
-data InventoriesIniGroup = InventoriesIniGroup Text.Text [InventoriesIniMachines]
+data IniGroup = IniGroup Text.Text [InventoriesIniMachines]
         deriving Show
 
 -- | The components of every machine/variables.
@@ -141,8 +141,8 @@ parserInventoriesIni = do
         return $ Ini sections
 
 -- Group parser loop.
-parserInventoriesIni' :: [InventoriesIniGroup]
-                      -> AT.Parser [InventoriesIniGroup]
+parserInventoriesIni' :: [IniGroup]
+                      -> AT.Parser [IniGroup]
 parserInventoriesIni' xss = do
         parserTrim
         peek <- AT.peekChar
@@ -155,14 +155,14 @@ parserInventoriesIni' xss = do
 -- Parse a group.
 -- The name of "[section_name:subsection_name]" or "[section_name:vars]" is
 -- parsed as one text.
-parseGroup :: AT.Parser InventoriesIniGroup
+parseGroup :: AT.Parser IniGroup
 parseGroup = do
         _ <- AT.char '['
         name <- AT.takeWhile (/= ']')
         _ <- AT.char ']'
         parserTrim
         content <- parseGroupContent []
-        return $ InventoriesIniGroup name content
+        return $ IniGroup name content
 
 -- Parse group content.
 parseGroupContent :: [InventoriesIniMachines]
