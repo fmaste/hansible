@@ -131,8 +131,8 @@ parserInventoriesIni' xss = do
         case peek of
                 Nothing -> return xss
                 (Just _) -> do
-                        section <- parseGroup
-                        parserInventoriesIni' (section:xss)
+                        group <- parseGroup
+                        parserInventoriesIni' (group:xss)
 
 parseGroup :: AT.Parser InventoriesIniSection
 parseGroup = do
