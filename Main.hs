@@ -78,10 +78,22 @@ fromIni' ((InventoriesIniGroup sectionName hosts):xss) (Inventory sMap hMap) =
                 (Inventory
                         (Map.insert
                                 sectionName
-                                (Set.fromList hosts, Map.empty)
+                                (
+                                          Set.fromList $ map
+                                                (head. inventoriesIniMachines)
+                                                hosts
+                                        , Map.empty
+                                )
                                 sMap
                         )
-                        (fromIni'' sectionName hosts hMap)
+                        (fromIni''
+                                sectionName
+                                (map
+                                        (head . inventoriesIniMachines)
+                                        hosts
+                                )
+                                hMap
+                        )
                 )
 
 fromIni'' :: Text.Text
@@ -111,8 +123,14 @@ data InventoriesIni = InventoriesIni [InventoriesIniGroup]
 -- https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#inheriting-variable-values-group-variables-for-groups-of-groups
 -- Section level variables are parsed as machine names:
 -- https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#assigning-a-variable-to-many-machines-group-variables
-data InventoriesIniGroup = InventoriesIniGroup Text.Text [Text.Text]
+data InventoriesIniGroup = InventoriesIniGroup Text.Text [InventoriesIniMachines]
         deriving Show
+
+-- | The components of every machine/variables.
+data InventoriesIniMachines = InventoriesIniMachines
+        {
+                inventoriesIniMachines :: [Text.Text]
+        } deriving Show
 
 --------------------------------------------------------------------------------
 
@@ -147,7 +165,8 @@ parseGroup = do
         return $ InventoriesIniGroup name content
 
 -- Parse group content.
-parseGroupContent :: [Text.Text] -> AT.Parser [Text.Text]
+parseGroupContent :: [InventoriesIniMachines]
+                  -> AT.Parser [InventoriesIniMachines]
 parseGroupContent xss = do
         peek <- AT.peekChar
         case peek of
@@ -155,9 +174,27 @@ parseGroupContent xss = do
                 (Just char) -> if char == '['
                         then return xss
                         else do
-                                content <- AT.takeTill isSpace
+                                machines <- parseMachines []
                                 parserTrim
-                                parseGroupContent (content:xss)
+                                parseGroupContent
+                                        ((InventoriesIniMachines machines):xss)
+
+-- Parse machine name and/or variables.
+-- Variables are parsed as a single text.
+parseMachines :: [Text.Text] -> AT.Parser [Text.Text]
+parseMachines xss = do
+        machineName <- AT.takeTill isSpace
+        AT.skipWhile (\char -> char == ' ' || char == '\t')
+        maybeChar <- AT.peekChar
+        case maybeChar of
+                Nothing -> return (xss ++ [machineName])
+                (Just char) -> if AT.inClass "\r\n;#" char
+                        then do
+                                parserTrim
+                                return (xss ++ [machineName])
+                        else do
+                                parserTrim
+                                parseMachines (xss ++ [machineName])
 
 -- Trim whitespace and comments.
 parserTrim :: AT.Parser ()
