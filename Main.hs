@@ -70,7 +70,6 @@ toDot (Inventory sMap hMap) = do
 fromIni :: InventoriesIni -> Inventory
 fromIni (InventoriesIni xss) = fromIni' xss (Inventory Map.empty Map.empty)
 
-
 fromIni' :: [InventoriesIniGroup] -> Inventory -> Inventory
 fromIni' [] h = h
 fromIni' ((InventoriesIniGroup sectionName hosts):xss) (Inventory sMap hMap) =
