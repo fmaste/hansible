@@ -205,6 +205,20 @@ parseMachines xss = do
                                 parserTrim
                                 parseMachines (xss ++ [machineName])
 
+{-- TODO: How INI variables are parsed:
+https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#inventory-aliases
+
+When declared inline with the host, INI values are interpreted as Python literal
+structures (strings, numbers, tuples, lists, dicts, booleans, None). Host lines
+accept multiple key=value parameters per line. Therefore they need a way to
+indicate that a space is part of a value rather than a separator.
+
+When declared in a :vars section, INI values are interpreted as strings. For
+example var=FALSE would create a string equal to ‘FALSE’. Unlike host lines,
+:vars sections accept only a single entry per line, so everything after the =
+must be the value for the entry.
+--}
+
 -- Trim whitespace and comments.
 parserTrim :: AT.Parser ()
 parserTrim = do
