@@ -123,11 +123,11 @@ data Ini = Ini [IniGroup]
 -- https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#inheriting-variable-values-group-variables-for-groups-of-groups
 -- Section level variables are parsed as machine names:
 -- https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#assigning-a-variable-to-many-machines-group-variables
-data IniGroup = IniGroup Text.Text [InventoriesIniMachines]
+data IniGroup = IniGroup Text.Text [IniMachines]
         deriving Show
 
 -- | The components of every machine/variables.
-data InventoriesIniMachines = InventoriesIniMachines
+data IniMachines = IniMachines
         {
                 inventoriesIniMachines :: [Text.Text]
         } deriving Show
@@ -165,8 +165,8 @@ parseGroup = do
         return $ IniGroup name content
 
 -- Parse group content.
-parseGroupContent :: [InventoriesIniMachines]
-                  -> AT.Parser [InventoriesIniMachines]
+parseGroupContent :: [IniMachines]
+                  -> AT.Parser [IniMachines]
 parseGroupContent xss = do
         peek <- AT.peekChar
         case peek of
@@ -177,7 +177,7 @@ parseGroupContent xss = do
                                 machines <- parseMachines []
                                 parserTrim
                                 parseGroupContent
-                                        ((InventoriesIniMachines machines):xss)
+                                        ((IniMachines machines):xss)
 
 -- Parse machine name and/or variables.
 -- Variables are parsed as a single text.
