@@ -71,9 +71,9 @@ fromIni :: InventoriesIni -> Inventory
 fromIni (InventoriesIni xss) = fromIni' xss (Inventory Map.empty Map.empty)
 
 
-fromIni' :: [InventoriesIniSection] -> Inventory -> Inventory
+fromIni' :: [InventoriesIniGroup] -> Inventory -> Inventory
 fromIni' [] h = h
-fromIni' ((InventoriesIniSection sectionName hosts):xss) (Inventory sMap hMap) =
+fromIni' ((InventoriesIniGroup sectionName hosts):xss) (Inventory sMap hMap) =
         fromIni'
                 xss
                 (Inventory
@@ -104,7 +104,7 @@ fromIni'' sectionName (hostName:hosts) hMap = fromIni'' sectionName hosts
 --------------------------------------------------------------------------------
 
 -- | The list of sections.
-data InventoriesIni = InventoriesIni [InventoriesIniSection]
+data InventoriesIni = InventoriesIni [InventoriesIniGroup]
         deriving Show
 
 -- | The components of every section.
@@ -112,7 +112,7 @@ data InventoriesIni = InventoriesIni [InventoriesIniSection]
 -- https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#inheriting-variable-values-group-variables-for-groups-of-groups
 -- Section level variables are parsed as machine names:
 -- https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#assigning-a-variable-to-many-machines-group-variables
-data InventoriesIniSection = InventoriesIniSection Text.Text [Text.Text]
+data InventoriesIniGroup = InventoriesIniGroup Text.Text [Text.Text]
         deriving Show
 
 --------------------------------------------------------------------------------
@@ -123,8 +123,8 @@ parserInventoriesIni = do
         sections <- parserInventoriesIni' []
         return $ InventoriesIni sections
 
-parserInventoriesIni' :: [InventoriesIniSection]
-                      -> AT.Parser [InventoriesIniSection]
+parserInventoriesIni' :: [InventoriesIniGroup]
+                      -> AT.Parser [InventoriesIniGroup]
 parserInventoriesIni' xss = do
         parserWhiteSpace
         peek <- AT.peekChar
@@ -134,14 +134,14 @@ parserInventoriesIni' xss = do
                         group <- parseGroup
                         parserInventoriesIni' (group:xss)
 
-parseGroup :: AT.Parser InventoriesIniSection
+parseGroup :: AT.Parser InventoriesIniGroup
 parseGroup = do
         _ <- AT.char '['
         name <- AT.takeWhile (/= ']')
         _ <- AT.char ']'
         parserWhiteSpace
         content <- parseGroupContent []
-        return $ InventoriesIniSection name content
+        return $ InventoriesIniGroup name content
 
 parseGroupContent :: [Text.Text] -> AT.Parser [Text.Text]
 parseGroupContent xss = do
