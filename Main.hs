@@ -112,7 +112,13 @@ fromIni'' sectionName (hostName:hosts) hMap = fromIni'' sectionName hosts
                 hMap
         )
 
+-- Inventories INI parser.
 --------------------------------------------------------------------------------
+{- The ini parser is a very simple one. Parse every group with its name as
+   given and parse the content/machines of every group as given. This machines
+   can be just one machine name, one machine name and many variables or just
+   one or more variables.
+-}
 
 -- | The list of sections.
 data Ini = Ini [IniGroup]
