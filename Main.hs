@@ -103,9 +103,15 @@ fromIni'' sectionName (hostName:hosts) hMap = fromIni'' sectionName hosts
 
 --------------------------------------------------------------------------------
 
+-- | The list of sections.
 data InventoriesIni = InventoriesIni [InventoriesIniSection]
         deriving Show
 
+-- | The components of every section.
+-- Groups of groups are parsed as one group here:
+-- https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#inheriting-variable-values-group-variables-for-groups-of-groups
+-- Section level variables are parsed as machine names:
+-- https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#assigning-a-variable-to-many-machines-group-variables
 data InventoriesIniSection = InventoriesIniSection Text.Text [Text.Text]
         deriving Show
 
