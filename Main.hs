@@ -67,8 +67,8 @@ toDot (Inventory sMap hMap) = do
 
 --------------------------------------------------------------------------------
 
-fromIni :: InventoriesIni -> Inventory
-fromIni (InventoriesIni xss) = fromIni' xss (Inventory Map.empty Map.empty)
+fromIni :: Ini -> Inventory
+fromIni (Ini xss) = fromIni' xss (Inventory Map.empty Map.empty)
 
 fromIni' :: [InventoriesIniGroup] -> Inventory -> Inventory
 fromIni' [] h = h
@@ -115,7 +115,7 @@ fromIni'' sectionName (hostName:hosts) hMap = fromIni'' sectionName hosts
 --------------------------------------------------------------------------------
 
 -- | The list of sections.
-data InventoriesIni = InventoriesIni [InventoriesIniGroup]
+data Ini = Ini [InventoriesIniGroup]
         deriving Show
 
 -- | The components of every group.
@@ -135,10 +135,10 @@ data InventoriesIniMachines = InventoriesIniMachines
 --------------------------------------------------------------------------------
 
 -- INI parser starting point.
-parserInventoriesIni :: AT.Parser InventoriesIni
+parserInventoriesIni :: AT.Parser Ini
 parserInventoriesIni = do
         sections <- parserInventoriesIni' []
-        return $ InventoriesIni sections
+        return $ Ini sections
 
 -- Group parser loop.
 parserInventoriesIni' :: [InventoriesIniGroup]
